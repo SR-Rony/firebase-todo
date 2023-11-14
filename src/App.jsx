@@ -9,6 +9,8 @@ import {
 import SingUp from './pages/SingUp';
 import Login from './pages/Login';
 import Home from './pages/Home';
+import { ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 function App() {
@@ -26,6 +28,7 @@ function App() {
   return (
     <>
     <RouterProvider router={router} />
+    <ToastContainer />
     </>
   )
 }
