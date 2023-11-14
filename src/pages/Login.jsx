@@ -18,7 +18,7 @@ const Login = () => {
   // all error state
   const [emailError,setEmailError]=useState('')
   const [passwordError,setPasswordError]=useState('')
-  // let navigate =useNavigate()
+  let navigate =useNavigate()
   // let dispatch=useDispatch()
 
   // let userInfo=useSelector(state=>(state.user.value))
@@ -55,7 +55,7 @@ const Login = () => {
         // if(user.user.emailVerified){
           // dispatch(userData(user.user))
           // localStorage.setItem('userdata',JSON.stringify(user.user))
-          // navigate('/profile')
+          navigate('/home')
         // }else{
         //     toast.error('🦄 please your email varify', {
         //       position: "top-right",
