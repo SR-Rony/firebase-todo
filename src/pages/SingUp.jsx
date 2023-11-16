@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Heading from '../components/Heading'
 // import {TextInput } from "keep-react";
 import Paragraph from '../components/Paragraph';
@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import {toast} from 'react-toastify';
 import { getDatabase,ref, set } from "firebase/database";
 import {AiFillEyeInvisible,AiFillEye} from 'react-icons/ai'
+import { useSelector } from 'react-redux';
 
 const SingUp = () => {
     const db = getDatabase();
@@ -21,6 +22,13 @@ const SingUp = () => {
     const [emailError,setEmailError]=useState('')
     const [passwordError,setPasswordError]=useState('')
     let navigate=useNavigate()
+
+    let userInfo=useSelector(state=>(state.user.value))
+    useEffect(()=>{
+      if(userInfo){
+        navigate('/home')
+      }
+    },[])
 
     // input change
   const handleChange =(e)=>{

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Heading from '../components/Heading';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from 'react-router-dom'
@@ -6,10 +6,10 @@ import { RotatingLines } from 'react-loader-spinner'
 import {toast } from 'react-toastify';
 import Paragraph from '../components/Paragraph';
 import {AiFillEyeInvisible,AiFillEye} from 'react-icons/ai'
+import { activeUser } from '../slices/userSlice';
+import { useDispatch, useSelector } from 'react-redux';
 
 const Login = () => {
-
-
   const auth = getAuth();
   const [inputValue,setInputValue]=useState({email:'',password:''})
   let {email,password}=inputValue
@@ -19,14 +19,14 @@ const Login = () => {
   const [emailError,setEmailError]=useState('')
   const [passwordError,setPasswordError]=useState('')
   let navigate =useNavigate()
-  // let dispatch=useDispatch()
+  let dispatch=useDispatch()
 
-  // let userInfo=useSelector(state=>(state.user.value))
-  // useEffect(()=>{
-  //   if(userInfo){
-  //     navigate('/profile')
-  //   }
-  // },[])
+  let userInfo=useSelector(state=>(state.user.value))
+  useEffect(()=>{
+    if(userInfo){
+      navigate('/home')
+    }
+  },[])
 
   // input change
   const handleChange =(e)=>{
@@ -53,9 +53,9 @@ const Login = () => {
       .then((user) => {
         setLodding(false)
         // if(user.user.emailVerified){
-          // dispatch(userData(user.user))
-          // localStorage.setItem('userdata',JSON.stringify(user.user))
-          navigate('/home')
+          dispatch(activeUser(user.user))
+          localStorage.setItem('userdata',JSON.stringify(user.user))
+          // navigate('/home')
         // }else{
         //     toast.error('🦄 please your email varify', {
         //       position: "top-right",

@@ -4,6 +4,8 @@ import Paragraph from './Paragraph';
 import Heading from './Heading';
 import Modal from 'react-modal';
 import { IoIosSend } from "react-icons/io";
+import { useSelector } from 'react-redux';
+import SR from '../assets/rr.png'
 
 const customStyles = {
     content: {
@@ -31,6 +33,9 @@ const FirebaseTodo = () => {
     const [updet,setUpdet]= useState(false)
     const [titleError,setTitleError]= useState('')
     const [descriptionError,setDescriptionError]= useState('')
+    // user info
+    let userInfo=useSelector(state=>(state.user.value))
+    // console.log(userInfo.displayName);
     // modal stat
     let subtitle;
     const [modalIsOpen, setIsOpen] = React.useState(false);
@@ -138,13 +143,9 @@ const FirebaseTodo = () => {
   return (
     <div className="bg-gray-900 w-screen h-screen p-5 box-border">
         <div className='grid grid-cols-7 gap-3 h-full'>
-                <div className='col-span-1 bg-white p-2 text-center'>
-                    {todoUserArray.map(item=>(
-                        <div className='flex justify-between bg-gray-700 text-white p-2 hover:bg-gray-900 my-2'>
-                            <Heading text={item.userName}/>
-                            <button>send</button>
-                        </div>
-                    ))}
+                <div className='col-span-1 bg-white px-2 py-5 text-center'>
+                    <img className='w-20 h-20 rounded-full ring bg-slate-800 mx-auto' src={SR} alt="img" />
+                    <Heading text={userInfo.displayName}/>
                 </div>
                 <div className='col-span-3 bg-white p-10 text-center'>
                     <Heading text='TODO LIST'/>
