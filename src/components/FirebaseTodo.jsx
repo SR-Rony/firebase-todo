@@ -1,8 +1,23 @@
 import React, { useEffect, useState } from 'react'
 import { getDatabase, push, ref, set,onValue,remove,update   } from "firebase/database";
-import Hedding from './Hedding';
-import { Button } from 'keep-react';
 import Paragraph from './Paragraph';
+import Heading from './Heading';
+import Modal from 'react-modal';
+import { IoIosSend } from "react-icons/io";
+
+const customStyles = {
+    content: {
+      top: '50%',
+      left: '50%',
+      right: 'auto',
+      bottom: 'auto',
+      marginRight: '-50%',
+      transform: 'translate(-50%, -50%)',
+      width:'500px'
+    },
+  };
+
+  Modal.setAppElement('#root');
 
 const FirebaseTodo = () => {
     const db = getDatabase();
@@ -16,6 +31,9 @@ const FirebaseTodo = () => {
     const [updet,setUpdet]= useState(false)
     const [titleError,setTitleError]= useState('')
     const [descriptionError,setDescriptionError]= useState('')
+    // modal stat
+    let subtitle;
+    const [modalIsOpen, setIsOpen] = React.useState(false);
 
     useEffect(()=>{
         const todoRef = ref(db, 'todo-list');
@@ -84,10 +102,9 @@ const FirebaseTodo = () => {
         setTodo({
             title:item.title,
             description: item.description
-        }).then(()=>{
-            setUpdet(true)
-            setTodoId(item.id)
         })
+        setUpdet(true)
+        setTodoId(item.id)
     }
     //todo update button
     const handleUpdate = ()=>{
@@ -95,27 +112,49 @@ const FirebaseTodo = () => {
             title:todo.title,
             description:todo.description
         }).then(()=>{
-            setTodo('')
+            setTodo({
+                title: "",
+                description: ""
+            })
           }).then(()=>{
               setUpdet(false)
           })
     } 
+    // modal function
+    function openModal() {
+        setIsOpen(true);
+      }
+    
+      function afterOpenModal() {
+        // references are now sync'd and can be accessed.
+        subtitle.style.color = '#f00';
+      }
+    
+      function closeModal() {
+        setIsOpen(false);
+      }
 
 
   return (
-    <div className="bg-blue-900">
-        <div className="container mx-auto">
-            <div className='grid grid-cols-3 justify-center items-center h-screen'>
-                <div className='col-span-2 bg-white p-10 text-center'>
-                    <Hedding text='TODO LIST'/>
-                    <div className="">
-                        <div>
+    <div className="bg-gray-900 w-screen h-screen p-5 box-border">
+        <div className='grid grid-cols-7 gap-3 h-full'>
+                <div className='col-span-1 bg-white p-2 text-center'>
+                    {todoUserArray.map(item=>(
+                        <div className='flex justify-between bg-gray-700 text-white p-2 hover:bg-gray-900 my-2'>
+                            <Heading text={item.userName}/>
+                            <button>send</button>
+                        </div>
+                    ))}
+                </div>
+                <div className='col-span-3 bg-white p-10 text-center'>
+                    <Heading text='TODO LIST'/>
+                    <div>
                             <div className='w-full'>
-                                <input  className='py-2 px-5 ring my-5 w-1/2' name='title' onChange={handleChange} type="text" placeholder='title' value={todo.title} />
+                                <input  className='py-2 px-5 ring my-2 w-full' name='title' onChange={handleChange} type="text" placeholder='title' value={todo.title} />
                                 {titleError&&<Paragraph className='text-red-700 my-2' text={titleError}/>}
                             </div>
                             <div className="w-full">
-                                <input  className='py-2 px-5 ring my-5 w-1/2' name='description' onChange={handleChange} type="text" placeholder='description' value={todo.description} />
+                                <textarea  className='p-2 ring my-2 w-full h-48' name='description' onChange={handleChange} type="text" placeholder='description' value={todo.description} />
                                 {descriptionError&&<Paragraph className='text-red-700 my-2' text={descriptionError}/>}
                             </div>
                             {updet
@@ -124,33 +163,44 @@ const FirebaseTodo = () => {
                             }
                         </div>
                     </div>
-                    
-                    <ul>
-                        {todoArray.map((item,id)=>(
-                            <div className='flex justify-between items-center w-1/2 bg-gray-700 text-white p-2 box-border hover:bg-gray-900 my-2 mx-auto'>
-                                <div>
-                                    <li key={id}>{item.title}</li>
-                                    <li key={id}>{item.description}</li>
-                                </div>
-                                <div className='text-end'>
-                                    <button className='py-2 px-5 bg-blue-800 text-white mx-2 block my-2' onClick={()=>handleEdit(item)}>edit</button> 
-                                    <button className='py-2 px-5 bg-blue-800 text-white mx-2 block my-2' onClick={()=>handleDelet(item.id)}>delete</button>
-                                </div>
+                <div className='col-span-3 bg-white p-2'>
+                    <Heading className='text-center' text="All Todo List"/>
+                    {todoArray.map((item,id)=>(
+                        <div key={id} className=' text-center bg-gray-700 text-white p-2 hover:bg-gray-900 my-2'>
+                            <div>
+                                <Paragraph text={item.title}/>
+                                <Paragraph text={item.description}/>
                             </div>
-                        ))}
-                    </ul>
-                </div>
-                <div className='col-span-1 bg-white p-2 ml-5 text-center'>
-                    <Hedding text="User list"/>
-                    {todoUserArray.map(item=>(
-                        <div className='flex justify-between bg-gray-700 text-white text-center my-2 hover:bg-gray-800 px-2'>
-                            <Hedding text={item.userName}/>
-                            <button className='py-2 px-5 bg-blue-800 text-white'>access</button>
+                            <div className='flex gap-2 justify-center mt-5'>
+                                <button className='py-2 px-5 bg-blue-800 text-white  ' onClick={()=>handleEdit(item)}>Edit</button> 
+                                <button className='py-2 px-5 bg-blue-800 text-white' onClick={openModal}>Send</button>
+                                <button className='py-2 px-5 bg-blue-800 text-white ' onClick={()=>handleDelet(item.id)}>Delete</button>
+                            </div>
                         </div>
                     ))}
                 </div>
             </div>
-        </div>
+            {/* modal */}
+            <Modal
+                isOpen={modalIsOpen}
+                onAfterOpen={afterOpenModal}
+                onRequestClose={closeModal}
+                style={customStyles}
+                contentLabel="Example Modal"
+            >
+                <button onClick={closeModal}>close</button>
+                <Heading className='text-center' text='User List'/>
+                <div>
+                    {todoUserArray.map(item=>(
+                        <div className='flex justify-between bg-gray-700 text-white p-2 hover:bg-gray-900 my-2'>
+                            <Heading text={item.userName}/>
+                            <button>
+                            <IoIosSend />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            </Modal>
     </div>
   )
 }

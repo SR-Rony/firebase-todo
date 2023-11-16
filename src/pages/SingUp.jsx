@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
-import { Button } from 'keep-react'
-import Hedding from '../components/Hedding'
+import Heading from '../components/Heading'
 // import {TextInput } from "keep-react";
 import Paragraph from '../components/Paragraph';
 import { getAuth, createUserWithEmailAndPassword,updateProfile,sendEmailVerification } from "firebase/auth";
@@ -111,7 +110,7 @@ const SingUp = () => {
   return (
     <div className='grid justify-center items-center bg-gray-900 h-screen'>
         <div className='bg-white p-10 text-center'>
-            <Hedding text={`Get started with easily`} span=' register'/>
+            <Heading text={`Get started with easily`} span=' register'/>
             <form onSubmit={handleSubmit} className='my-10' action="">
                 <div className=''>
                 <input  className='w-full py-3 px-5 ring ring-primary focus-visible:ring-0 my-5' onChange={handleChange} type="text" name='fullName' value={fullName} placeholder="full name"/>

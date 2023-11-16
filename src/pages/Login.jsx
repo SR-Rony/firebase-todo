@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import Hedding from '../components/Hedding';
+import Heading from '../components/Heading';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from 'react-router-dom'
 import { RotatingLines } from 'react-loader-spinner'
@@ -95,7 +95,7 @@ const Login = () => {
   return (
     <div className='grid justify-center items-center bg-gray-900 h-screen'>
     <div className='bg-white p-10 text-center'>
-      <Hedding text={`Get started with easily`} span=' login'/>
+      <Heading text={`Get started with easily`} span=' login'/>
       <form onSubmit={handleSubmit} className='my-10' action="">
         <div>
           <input className='w-full py-3 px-5 ring ring-primary focus-visible:ring-0 my-5' onChange={handleChange} type="email" name='email' value={email} placeholder='email'/>
