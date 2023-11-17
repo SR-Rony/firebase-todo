@@ -55,7 +55,7 @@ const Login = () => {
         // if(user.user.emailVerified){
           dispatch(activeUser(user.user))
           localStorage.setItem('userdata',JSON.stringify(user.user))
-          // navigate('/home')
+          navigate('/home')
         // }else{
         //     toast.error('🦄 please your email varify', {
         //       position: "top-right",

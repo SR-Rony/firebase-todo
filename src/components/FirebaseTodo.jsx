@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react'
-import { getDatabase, push, ref, set,onValue,remove,update   } from "firebase/database";
+import { getDatabase, push, ref, set,onValue,remove,update , } from "firebase/database";
 import Paragraph from './Paragraph';
 import Heading from './Heading';
 import Modal from 'react-modal';
 import { IoIosSend } from "react-icons/io";
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import SR from '../assets/rr.png'
+import Button from './Button';
+import { activeUser } from '../slices/userSlice';
+import { useNavigate } from 'react-router-dom';
+import { getAuth, signOut } from "firebase/auth";
 
 const customStyles = {
     content: {
@@ -22,6 +26,7 @@ const customStyles = {
   Modal.setAppElement('#root');
 
 const FirebaseTodo = () => {
+    const auth = getAuth();
     const db = getDatabase();
     const [todo,setTodo]=useState({
         title: "",
@@ -33,9 +38,11 @@ const FirebaseTodo = () => {
     const [updet,setUpdet]= useState(false)
     const [titleError,setTitleError]= useState('')
     const [descriptionError,setDescriptionError]= useState('')
+    const [sendTodo,setSendTodo]=useState('')
     // user info
     let userInfo=useSelector(state=>(state.user.value))
-    // console.log(userInfo.displayName);
+    let navigate =useNavigate()
+    let dispatch=useDispatch()
     // modal stat
     let subtitle;
     const [modalIsOpen, setIsOpen] = React.useState(false);
@@ -45,7 +52,9 @@ const FirebaseTodo = () => {
         onValue(todoRef, (snapshot) => {
             let array =[]
             snapshot.forEach((todoItem)=>{
-                array.push({...todoItem.val(),id:todoItem.key})
+                if(userInfo.uid==todoItem.val().userId){
+                    array.push({...todoItem.val(),id:todoItem.key})
+                }
             })
             setTodoArray(array)
         });
@@ -54,7 +63,10 @@ const FirebaseTodo = () => {
         onValue(todoUserRef, (snapshot) => {
             let array =[]
             snapshot.forEach((item)=>{
-                array.push({...item.val(),id:item.key})
+                if(item.key!=userInfo.uid){
+                    array.push({...item.val(),id:item.key})
+                }
+
             })
             setTodoUserArray(array)
         });
@@ -87,7 +99,9 @@ const FirebaseTodo = () => {
             })
             set(push(ref(db, 'todo-list')), {
                 title:todo.title,
-                description:todo.description
+                description:todo.description,
+                userId:userInfo.uid,
+                userName:userInfo.displayName
               }).then(()=>{
                 setTodo({
                     title: "",
@@ -126,26 +140,58 @@ const FirebaseTodo = () => {
           })
     } 
     // modal function
-    function openModal() {
+    function openModal(item) {
         setIsOpen(true);
+        setSendTodo(item)
       }
     
-      function afterOpenModal() {
-        // references are now sync'd and can be accessed.
-        subtitle.style.color = '#f00';
-      }
+    function afterOpenModal() {
+    // references are now sync'd and can be accessed.
+    subtitle.style.color = '#f00';
+    }
     
-      function closeModal() {
-        setIsOpen(false);
-      }
+    function closeModal() {
+    setIsOpen(false);
+    }
 
+    // handle send message
+    const handleSend =(item)=>{
+        // set(push(ref(db, 'todo-list')), {
+        //     title:sendTodo.title,
+        //     description:sendTodo.description,
+        //     sendName:userInfo.displayName,
+        //     sendId:userInfo.uid,
+        //     receivName:item.userName,
+        //     receivId:item.id,
+        //   })
+
+        console.log({
+            title:sendTodo.title,
+            description:sendTodo.description,
+            sendName:userInfo.displayName,
+            sendId:userInfo.uid,
+            receivName:item.userName,
+            receivId:item.id,
+            id:sendTodo.id
+        });
+    }  
+    // handle logout button
+    const handleLogout =()=>{
+        signOut(auth).then(() => {
+            dispatch(activeUser(null));
+            localStorage.removeItem('userdata')
+            navigate('/login')
+          })
+          console.log('logout');
+    }
 
   return (
     <div className="bg-gray-900 w-screen h-screen p-5 box-border">
         <div className='grid grid-cols-7 gap-3 h-full'>
                 <div className='col-span-1 bg-white px-2 py-5 text-center'>
                     <img className='w-20 h-20 rounded-full ring bg-slate-800 mx-auto' src={SR} alt="img" />
-                    <Heading text={userInfo.displayName}/>
+                    <Heading className='my-5' text={userInfo.displayName}/>
+                    <Button onClick={handleLogout} text='Logout'/>
                 </div>
                 <div className='col-span-3 bg-white p-10 text-center'>
                     <Heading text='TODO LIST'/>
@@ -159,23 +205,23 @@ const FirebaseTodo = () => {
                                 {descriptionError&&<Paragraph className='text-red-700 my-2' text={descriptionError}/>}
                             </div>
                             {updet
-                                ? <button className='py-2 px-5 bg-blue-800 text-white mx-2' onClick={handleUpdate}>update</button>
-                                :<button className='py-2 px-5 bg-blue-800 text-white mx-2' onClick={handleAdd}>add todo</button>
+                                ? <Button onClick={handleUpdate} text='Update'/>
+                                : <Button onClick={handleAdd} text='Add Todo'/>
                             }
                         </div>
                     </div>
                 <div className='col-span-3 bg-white p-2'>
                     <Heading className='text-center' text="All Todo List"/>
-                    {todoArray.map((item,id)=>(
-                        <div key={id} className=' text-center bg-gray-700 text-white p-2 hover:bg-gray-900 my-2'>
+                    {todoArray.map((item)=>(
+                        <div key={item.id} className=' text-center bg-gray-700 text-white p-2 hover:bg-gray-900 my-2'>
                             <div>
                                 <Paragraph text={item.title}/>
                                 <Paragraph text={item.description}/>
                             </div>
                             <div className='flex gap-2 justify-center mt-5'>
-                                <button className='py-2 px-5 bg-blue-800 text-white  ' onClick={()=>handleEdit(item)}>Edit</button> 
-                                <button className='py-2 px-5 bg-blue-800 text-white' onClick={openModal}>Send</button>
-                                <button className='py-2 px-5 bg-blue-800 text-white ' onClick={()=>handleDelet(item.id)}>Delete</button>
+                                <Button onClick={()=>handleEdit(item)} text='Edit'/>
+                                <Button onClick={()=>openModal(item)} text='Send'/>
+                                <Button onClick={()=>handleDelet(item.id)} text='Delete'/>
                             </div>
                         </div>
                     ))}
@@ -195,9 +241,7 @@ const FirebaseTodo = () => {
                     {todoUserArray.map(item=>(
                         <div className='flex justify-between bg-gray-700 text-white p-2 hover:bg-gray-900 my-2'>
                             <Heading text={item.userName}/>
-                            <button>
-                            <IoIosSend />
-                            </button>
+                            <IoIosSend className='text-2xl cursor-pointer' onClick={()=>handleSend(item)} />
                         </div>
                     ))}
                 </div>
