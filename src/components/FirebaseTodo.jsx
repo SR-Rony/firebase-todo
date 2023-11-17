@@ -39,8 +39,10 @@ const FirebaseTodo = () => {
     const [titleError,setTitleError]= useState('')
     const [descriptionError,setDescriptionError]= useState('')
     const [sendTodo,setSendTodo]=useState('')
+    const [newTodo,setNewTodo]=useState([])
     // user info
     let userInfo=useSelector(state=>(state.user.value))
+    // console.log('useri',userInfo);
     let navigate =useNavigate()
     let dispatch=useDispatch()
     // modal stat
@@ -52,11 +54,21 @@ const FirebaseTodo = () => {
         onValue(todoRef, (snapshot) => {
             let array =[]
             snapshot.forEach((todoItem)=>{
-                if(userInfo.uid==todoItem.val().userId){
-                    array.push({...todoItem.val(),id:todoItem.key})
-                }
+                // if(userInfo.uid==todoItem.val().userId){
+                // }
+                array.push({...todoItem.val(),id:todoItem.key})
             })
             setTodoArray(array)
+            console.log('todo',array);
+        });
+        // send todo
+        const sendTodoRef = ref(db, 'send-todo');
+        onValue(sendTodoRef, (snapshot) => {
+            let array =[]
+            snapshot.forEach((todoItem)=>{
+                array.push({...todoItem.val(),id:todoItem.key})
+            })
+            setNewTodo(array)
         });
         // user list
         const todoUserRef = ref(db, 'users');
@@ -156,24 +168,25 @@ const FirebaseTodo = () => {
 
     // handle send message
     const handleSend =(item)=>{
-        // set(push(ref(db, 'todo-list')), {
-        //     title:sendTodo.title,
-        //     description:sendTodo.description,
-        //     sendName:userInfo.displayName,
-        //     sendId:userInfo.uid,
-        //     receivName:item.userName,
-        //     receivId:item.id,
-        //   })
-
-        console.log({
+        set(push(ref(db, 'send-todo')), {
             title:sendTodo.title,
             description:sendTodo.description,
             sendName:userInfo.displayName,
             sendId:userInfo.uid,
             receivName:item.userName,
             receivId:item.id,
-            id:sendTodo.id
-        });
+            todoId:sendTodo.id
+          })
+
+        // console.log({
+        //     title:sendTodo.title,
+        //     description:sendTodo.description,
+        //     sendName:userInfo.displayName,
+        //     sendId:userInfo.uid,
+        //     receivName:item.userName,
+        //     receivId:item.id,
+        //     id:sendTodo.id
+        // });
     }  
     // handle logout button
     const handleLogout =()=>{
@@ -213,17 +226,22 @@ const FirebaseTodo = () => {
                 <div className='col-span-3 bg-white p-2'>
                     <Heading className='text-center' text="All Todo List"/>
                     {todoArray.map((item)=>(
-                        <div key={item.id} className=' text-center bg-gray-700 text-white p-2 hover:bg-gray-900 my-2'>
+                        (newTodo.find((e)=>e.postId==item.id && e.receivId==userInfo.uid))||item.userId==userInfo.uid && 
+                            <div key={item.id} className=' text-center bg-gray-700 text-white p-2 hover:bg-gray-900 my-2'>
                             <div>
                                 <Paragraph text={item.title}/>
                                 <Paragraph text={item.description}/>
                             </div>
                             <div className='flex gap-2 justify-center mt-5'>
+                                {/* {newTodo.find((e)=>e.postId==item.id && e.receivId==userInfo.uid)||item.userId==userInfo.uid && 
                                 <Button onClick={()=>handleEdit(item)} text='Edit'/>
+                                } */}
                                 <Button onClick={()=>openModal(item)} text='Send'/>
                                 <Button onClick={()=>handleDelet(item.id)} text='Delete'/>
                             </div>
                         </div>
+                        
+                        
                     ))}
                 </div>
             </div>
