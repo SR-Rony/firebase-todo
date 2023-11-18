@@ -38,8 +38,9 @@ const FirebaseTodo = () => {
     const [updet,setUpdet]= useState(false)
     const [titleError,setTitleError]= useState('')
     const [descriptionError,setDescriptionError]= useState('')
-    const [sendTodo,setSendTodo]=useState('')
+    const [sendTodo,setSendTodo]=useState(null)
     const [newTodo,setNewTodo]=useState([])
+    console.log('new',newTodo);
     // user info
     let userInfo=useSelector(state=>(state.user.value))
     // console.log('useri',userInfo);
@@ -208,7 +209,7 @@ const FirebaseTodo = () => {
                 </div>
                 <div className='col-span-3 bg-white p-10 text-center'>
                     <Heading text='TODO LIST'/>
-                    <div>
+                        <>
                             <div className='w-full'>
                                 <input  className='py-2 px-5 ring my-2 w-full' name='title' onChange={handleChange} type="text" placeholder='title' value={todo.title} />
                                 {titleError&&<Paragraph className='text-red-700 my-2' text={titleError}/>}
@@ -221,29 +222,52 @@ const FirebaseTodo = () => {
                                 ? <Button onClick={handleUpdate} text='Update'/>
                                 : <Button onClick={handleAdd} text='Add Todo'/>
                             }
-                        </div>
+                        </>
                     </div>
                 <div className='col-span-3 bg-white p-2'>
                     <Heading className='text-center' text="All Todo List"/>
                     {todoArray.map((item)=>(
-                        (newTodo.find((e)=>e.postId==item.id && e.receivId==userInfo.uid))||item.userId==userInfo.uid && 
-                            <div key={item.id} className=' text-center bg-gray-700 text-white p-2 hover:bg-gray-900 my-2'>
+                        (userInfo.uid == item.userId || (newTodo.find((e)=> e.receivId == userInfo.uid && e.todoId == item.id)))&& 
+                            <div key={item.id} className=' text-center bg-gray-700 text-white p-2 my-2'>
                             <div>
                                 <Paragraph text={item.title}/>
                                 <Paragraph text={item.description}/>
                             </div>
                             <div className='flex gap-2 justify-center mt-5'>
-                                {/* {newTodo.find((e)=>e.postId==item.id && e.receivId==userInfo.uid)||item.userId==userInfo.uid && 
                                 <Button onClick={()=>handleEdit(item)} text='Edit'/>
-                                } */}
+                                {newTodo.find((e)=>e.postId==item.id && e.receivId==userInfo.uid)||item.userId==userInfo.uid &&
+                                    <Button onClick={()=>handleDelet(item.id)} text='Delete'/>
+                                }
                                 <Button onClick={()=>openModal(item)} text='Send'/>
-                                <Button onClick={()=>handleDelet(item.id)} text='Delete'/>
                             </div>
-                        </div>
+                            </div>
                         
                         
                     ))}
                 </div>
+                 {/* <div className='col-span-3 bg-white p-2'>
+                    <Heading className='text-center' text="All Todo List"/>
+                    {
+                        todoArray.map((item,index)=>{
+                            return (
+                                (userInfo.uid == item.userId || (newTodo.find((e)=> e.receivId == userInfo.uid && e.todoId == item.id))) &&
+                                <div key={item.id} className=' text-center bg-gray-700 text-white p-2 hover:bg-gray-900 my-2'>
+                            <div>
+                                <Paragraph text={item.title}/>
+                                <Paragraph text={item.description}/>
+                            </div>
+                            <div className='flex gap-2 justify-center mt-5'>
+                                {newTodo.find((e)=>e.postId==item.id && e.receivId==userInfo.uid)||item.userId==userInfo.uid && 
+                                <Button onClick={()=>handleEdit(item)} text='Edit'/>
+                                }
+                                <Button onClick={()=>openModal(item)} text='Send'/>
+                                <Button onClick={()=>handleDelet(item.id)} text='Delete'/>
+                            </div>
+                            </div>
+                            )
+                        })
+                    }
+                </div> */}
             </div>
             {/* modal */}
             <Modal
